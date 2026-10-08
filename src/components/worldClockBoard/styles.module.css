@@ -1,0 +1,147 @@
+.worldClockBoard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .plannerControls {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(250px, .75fr);
+        gap: 12px;
+
+        .referencePanel,
+        .overlapCard { min-width: 0; border: 1px solid #2a3c4b; border-radius: 13px; background: #111f2e; }
+
+        .referencePanel {
+            padding: 15px 17px 12px;
+
+            .panelHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+            .panelHeading p,
+            .overlapCard > p { color: #83e2cf; font-size: 8px; font-weight: 800; letter-spacing: .16em; }
+            .panelHeading h2 { margin-top: 4px; color: #eaf1f5; font-size: 16px; font-weight: 730; letter-spacing: -.025em; }
+            .referenceIcon { display: grid; width: 33px; height: 33px; place-items: center; border: 1px solid #314657; border-radius: 9px; color: #83e2cf; background: #83e2cf0b; font-size: 12px; }
+
+            .controlFields {
+                display: grid;
+                grid-template-columns: minmax(170px, 1fr) minmax(235px, 1.2fr) auto;
+                align-items: end;
+                gap: 10px;
+                margin-top: 13px;
+
+                .fieldGroup { display: flex; min-width: 0; flex-direction: column; gap: 5px; color: #96a5b0; font-size: 8px; font-weight: 650; }
+                .selectWrap,
+                .dateWrap { position: relative; display: flex; min-width: 0; align-items: center; }
+                select,
+                input { width: 100%; height: 36px; border: 1px solid #314454; border-radius: 7px; outline: none; color: #dce5ea; background: #0d1925; font-size: 9px; color-scheme: dark; }
+                select { appearance: none; padding: 0 28px 0 10px; }
+                input { padding: 0 8px 0 29px; }
+                select:focus,
+                input:focus { border-color: #83e2cf; box-shadow: 0 0 0 3px #83e2cf19; }
+                .selectWrap > svg { position: absolute; right: 10px; color: #8c9ba6; font-size: 8px; pointer-events: none; }
+                .dateWrap > svg { position: absolute; left: 10px; color: #9aabb6; font-size: 9px; pointer-events: none; }
+
+                .liveButton {
+                    display: inline-flex;
+                    min-height: 36px;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 7px;
+                    padding: 0 10px;
+                    border: 1px solid #314454;
+                    border-radius: 7px;
+                    color: #aab8c2;
+                    background: #182939;
+                    font-size: 8px;
+                    font-weight: 700;
+                    white-space: nowrap;
+
+                    > span { width: 6px; height: 6px; border-radius: 50%; background: #81909a; }
+                    &:hover { border-color: #597080; color: #eef3f6; }
+                    &:focus-visible { outline: 2px solid #83e2cf; outline-offset: 2px; }
+                    &.liveActive { border-color: #668d80; color: #b1e7d9; background: #83e2cf12; }
+                    &.liveActive > span { background: #83e2cf; box-shadow: 0 0 9px #83e2cf99; }
+                }
+            }
+
+            .referenceFootnote { margin-top: 9px; color: #728491; font-size: 8px; }
+        }
+
+        .overlapCard {
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+            justify-content: center;
+            padding: 15px 17px;
+            background: linear-gradient(130deg, #172b39, #142335);
+
+            > p { color: #c7ed7e; }
+            .overlapCount { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+            .overlapCount strong { color: #f4f6f8; font-size: 31px; font-weight: 700; line-height: 1.1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+            .overlapCount span { color: #96a6b1; font-size: 8px; }
+            h2 { margin-top: 3px; color: #eaf1f5; font-size: 12px; font-weight: 720; }
+            .overlapTrack { width: 100%; height: 4px; overflow: hidden; margin-top: 11px; border-radius: 4px; background: #324350; }
+            .overlapTrack i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #83e2cf, #c7ed7e); transition: width .2s; }
+            .overlapTip { margin-top: 6px; color: #7f909d; font-size: 8px; }
+        }
+
+        @media (max-width: 980px) { grid-template-columns: minmax(0, 1.5fr) minmax(220px, .8fr); .controlFields { grid-template-columns: minmax(150px, 1fr) minmax(200px, 1fr); .liveButton { grid-column: 1 / -1; justify-self: start; } } }
+        @media (max-width: 680px) { grid-template-columns: minmax(0, 1fr); .referencePanel .controlFields { grid-template-columns: minmax(0, 1fr); .liveButton { grid-column: auto; } } }
+    }
+
+    .clockSection {
+        position: relative;
+
+        .clockSectionHeader { display: flex; align-items: flex-end; justify-content: space-between; gap: 15px; margin-bottom: 11px; }
+        .clockSectionHeader > div:first-child > p { color: #83e2cf; font-size: 8px; font-weight: 800; letter-spacing: .16em; }
+        .clockSectionHeader h2 { margin-top: 4px; color: #eaf1f5; font-size: 19px; font-weight: 730; letter-spacing: -.035em; }
+        .clockSectionHeader span { display: block; margin-top: 3px; color: #82929f; font-size: 9px; }
+
+        .addZoneWrap { position: relative; z-index: 10; flex: 0 0 auto; }
+        .addZoneButton { display: inline-flex; min-height: 35px; align-items: center; justify-content: center; gap: 7px; padding: 0 11px; border: 1px solid #4b746d; border-radius: 7px; color: #a8e6d8; background: #15332f; font-size: 9px; font-weight: 700; white-space: nowrap; transition: border-color .16s, background .16s; }
+        .addZoneButton:hover,
+        .addZoneButton[aria-expanded="true"] { border-color: #83e2cf; background: #19443c; }
+        .addZoneButton:focus-visible { outline: 2px solid #83e2cf; outline-offset: 2px; }
+
+        .zonePicker {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: min(360px, calc(100vw - 36px));
+            padding: 10px;
+            border: 1px solid #334858;
+            border-radius: 11px;
+            background: #142435;
+            box-shadow: 0 20px 45px #050c14a8;
+
+            .searchField { position: relative; display: flex; align-items: center; }
+            .searchField > svg { position: absolute; left: 10px; color: #89a0af; font-size: 10px; pointer-events: none; }
+            input { width: 100%; height: 36px; padding: 0 10px 0 29px; border: 1px solid #344a5c; border-radius: 7px; outline: none; color: #ecf2f5; background: #0c1824; font-size: 10px; }
+            input::placeholder { color: #748694; }
+            input:focus { border-color: #83e2cf; }
+            ul { display: flex; max-height: 248px; flex-direction: column; overflow-y: auto; margin-top: 7px; }
+            li + li { border-top: 1px solid #283a49; }
+            li button { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 7px; border: 0; color: #e7eef2; text-align: left; background: transparent; }
+            li button:hover,
+            li button:focus-visible { outline: 0; background: #ffffff09; }
+            li button span { display: flex; flex-direction: column; }
+            li button strong { font-size: 10px; font-weight: 700; }
+            li button small { color: #8999a5; font-size: 8px; }
+            li button code { color: #7f9baa; font-size: 8px; }
+            .noMatches { padding: 18px 8px; color: #9aa8b2; font-size: 9px; }
+        }
+
+        .clockGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+        .emptyBoard { display: flex; min-height: 180px; align-items: center; flex-direction: column; justify-content: center; gap: 8px; border: 1px dashed #3b4f5f; border-radius: 12px; text-align: center; background: #101d2a; }
+        .emptyBoard span { color: #83e2cf; font-size: 8px; font-weight: 800; letter-spacing: .15em; }
+        .emptyBoard strong { color: #e5edf1; font-size: 12px; font-weight: 650; }
+        .emptyBoard button { margin-top: 4px; padding: 7px 10px; border: 1px solid #496f68; border-radius: 6px; color: #a8e6d8; background: #15332f; font-size: 9px; }
+
+        @media (max-width: 900px) { .clockGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 540px) {
+            .clockSectionHeader { align-items: flex-start; flex-direction: column; }
+            .clockGrid { grid-template-columns: minmax(0, 1fr); }
+            .zonePicker { right: auto; left: 0; }
+        }
+    }
+
+    @media (max-width: 430px) { gap: 16px; }
+}

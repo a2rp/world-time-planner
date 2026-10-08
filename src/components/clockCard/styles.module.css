@@ -1,0 +1,36 @@
+.clockCard {
+    position: relative;
+    min-width: 0;
+    min-height: 186px;
+    overflow: hidden;
+    padding: 16px 17px 13px;
+    border: 1px solid #2a3c4c;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #152536, #111f2d 75%);
+    transition: border-color .18s, transform .18s, background .18s;
+
+    &:hover { border-color: #496175; transform: translateY(-2px); }
+    &[data-night="false"] { background: linear-gradient(145deg, #172b39, #122330 76%); }
+    &[data-night="true"] { background: linear-gradient(145deg, #1b2438, #151e30 76%); }
+
+    .cityHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .cityHead > div { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .cityIndex { display: grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; border: 1px solid #314757; border-radius: 8px; color: #91a2af; background: #20334466; font-size: 8px; font-weight: 750; }
+    .cityName { min-width: 0; }
+    .cityName h3 { overflow: hidden; color: #edf4f7; font-size: 13px; font-weight: 730; text-overflow: ellipsis; white-space: nowrap; }
+    .cityName span { color: #8a9aa7; font-size: 9px; }
+    .removeButton { display: grid; width: 25px; height: 25px; place-items: center; border: 0; border-radius: 7px; color: #82919e; background: transparent; opacity: .7; transition: color .15s, background .15s, opacity .15s; }
+    .removeButton:hover { color: #ffad9a; background: #ff947d15; opacity: 1; }
+    .removeButton:focus-visible { outline: 2px solid #ff947d; outline-offset: 2px; opacity: 1; }
+    .zoneName { margin-top: 8px; color: #657783; font-size: 8px; letter-spacing: .04em; }
+    .timeLine { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 8px; }
+    .timeLine p { color: #f2f6f8; font-size: clamp(28px, 3vw, 37px); font-weight: 620; line-height: 1.05; letter-spacing: -.065em; font-variant-numeric: tabular-nums; }
+    .timeLine > span { color: #8f9eaa; font-size: 8px; white-space: nowrap; }
+    .dateLine { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; color: #9aa8b1; font-size: 9px; }
+    .dayShift { padding: 3px 6px; border-radius: 4px; color: #8bdcc9; background: #83e2cf14; font-size: 7px; font-weight: 800; letter-spacing: .08em; }
+    .workLine { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding-top: 9px; border-top: 1px solid #ffffff0d; color: #92a1ac; font-size: 8px; }
+    .statusDot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #f1a77a; box-shadow: 0 0 8px #f1a77a55; }
+    &[data-night="false"] .statusDot { background: #83e2cf; box-shadow: 0 0 8px #83e2cf66; }
+
+    @media (max-width: 600px) { min-height: 172px; padding: 14px; .timeLine p { font-size: 34px; } }
+}
