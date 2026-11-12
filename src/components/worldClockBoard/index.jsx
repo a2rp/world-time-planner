@@ -3,7 +3,7 @@ import { FaCalendarDays, FaChevronDown, FaGlobe, FaMagnifyingGlass, FaPlus } fro
 import ClockCard from "../clockCard/index.jsx";
 import DeleteZoneDialog from "../deleteZoneDialog/index.jsx";
 import { initialReferenceZone, initialZoneIds, timeZones as availableZones } from "../../data/timeZones.js";
-import { compareInZone, formatInZone, instantFromZonedInput, localDateTimeForZone } from "../../utils/timeConversion.js";
+import { compareInZone, formatInZone, instantFromZonedInput, isValidLocalDateTime, localDateTimeForZone } from "../../utils/timeConversion.js";
 import styles from "./styles.module.css";
 
 const storageKey = "hourline-world-time-v1";
@@ -15,9 +15,9 @@ const readSettings = () => {
         const saved = JSON.parse(localStorage.getItem(storageKey));
         if (saved && Array.isArray(saved.zoneIds) && availableZones.some((city) => city.zone === saved.referenceZone)) {
             return {
-                zoneIds: saved.zoneIds.filter((id) => findZone(id)),
+                zoneIds: [...new Set(saved.zoneIds.filter((id) => typeof id === "string" && findZone(id)))].slice(0, availableZones.length),
                 referenceZone: saved.referenceZone,
-                referenceTime: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(saved.referenceTime) ? saved.referenceTime : localDateTimeForZone(new Date(), saved.referenceZone),
+                referenceTime: isValidLocalDateTime(saved.referenceTime) ? saved.referenceTime : localDateTimeForZone(new Date(), saved.referenceZone),
             };
         }
     } catch { /* Start with the example city board if browser storage is unavailable. */ }
@@ -29,6 +29,7 @@ const WorldClockBoard = () => {
     const [zoneIds, setZoneIds] = useState(settings.zoneIds);
     const [referenceZone, setReferenceZone] = useState(settings.referenceZone);
     const [referenceTime, setReferenceTime] = useState(settings.referenceTime);
+    const [storageError, setStorageError] = useState(false);
     const [liveMode, setLiveMode] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -37,16 +38,24 @@ const WorldClockBoard = () => {
     const searchRef = useRef(null);
     const referenceCity = availableZones.find((city) => city.zone === referenceZone) ?? findZone("mumbai");
 
-    useEffect(() => {
-        try { localStorage.setItem(storageKey, JSON.stringify({ zoneIds, referenceZone, referenceTime })); } catch { /* Current settings remain available if storage is full. */ }
-    }, [zoneIds, referenceZone, referenceTime]);
+    const persistSettings = useCallback((nextSettings) => {
+        setZoneIds(nextSettings.zoneIds);
+        setReferenceZone(nextSettings.referenceZone);
+        setReferenceTime(nextSettings.referenceTime);
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(nextSettings));
+            setStorageError(false);
+        } catch {
+            setStorageError(true);
+        }
+    }, []);
 
     useEffect(() => {
         if (!liveMode) return undefined;
-        const tick = () => setReferenceTime(localDateTimeForZone(new Date(), referenceZone));
+        const tick = () => persistSettings({ zoneIds, referenceZone, referenceTime: localDateTimeForZone(new Date(), referenceZone) });
         const timer = window.setInterval(tick, 30000);
         return () => window.clearInterval(timer);
-    }, [liveMode, referenceZone]);
+    }, [liveMode, referenceZone, zoneIds, persistSettings]);
 
     useEffect(() => {
         if (!pickerOpen) return undefined;
@@ -65,16 +74,18 @@ const WorldClockBoard = () => {
     const referenceLocal = instant ? compareInZone(instant, referenceZone, referenceZone) : null;
     const matchingZones = useMemo(() => availableZones.filter((city) => !zoneIds.includes(city.id) && `${city.city} ${city.country} ${city.zone}`.toLowerCase().includes(search.trim().toLowerCase())), [search, zoneIds]);
 
-    const setNow = () => { setReferenceTime(localDateTimeForZone(new Date(), referenceZone)); setLiveMode(true); };
-    const handleReferenceZoneChange = (zone) => { setReferenceZone(zone); setLiveMode(false); };
-    const handleReferenceTimeChange = (value) => { setReferenceTime(value); setLiveMode(false); };
-    const addCity = (city) => { setZoneIds((current) => current.includes(city.id) ? current : [...current, city.id]); setSearch(""); setPickerOpen(false); };
+    const setNow = () => { persistSettings({ zoneIds, referenceZone, referenceTime: localDateTimeForZone(new Date(), referenceZone) }); setLiveMode(true); };
+    const handleReferenceZoneChange = (zone) => { persistSettings({ zoneIds, referenceZone: zone, referenceTime }); setLiveMode(false); };
+    const handleReferenceTimeChange = (value) => { persistSettings({ zoneIds, referenceZone, referenceTime: value }); setLiveMode(false); };
+    const addCity = (city) => { persistSettings({ zoneIds: zoneIds.includes(city.id) ? zoneIds : [...zoneIds, city.id], referenceZone, referenceTime }); setSearch(""); setPickerOpen(false); };
     const closeDeleteDialog = useCallback(() => setCityToRemove(null), []);
-    const removeCity = () => { const id = cityToRemove.id; setZoneIds((current) => current.filter((zoneId) => zoneId !== id)); setCityToRemove(null); };
+    const removeCity = () => { if (cityToRemove) persistSettings({ zoneIds: zoneIds.filter((zoneId) => zoneId !== cityToRemove.id), referenceZone, referenceTime }); setCityToRemove(null); };
 
-    const overlapMessage = workCount >= 2 ? "There's room to meet." : workCount === 1 ? "One city is in work hours." : "Most clocks are off duty.";
+    const overlapMessage = clocks.length === 0 ? "Add a city to start comparing." : workCount >= 2 ? "There's room to meet." : workCount === 1 ? "One city is in work hours." : "Most clocks are off duty.";
+    const overlapTip = clocks.length === 0 ? "Choose a city from the board below." : workCount >= 2 ? "Check the city cards for the best local fit." : workCount === 1 ? "Try moving the time to find more overlap." : "Move the reference time and compare again.";
 
     return <section className={styles.worldClockBoard} aria-label="World time comparison">
+        {storageError && <p className={styles.storageWarning} role="alert">This browser could not save your latest changes. They may be lost when you reload this page.</p>}
         <div className={styles.plannerControls}>
             <section className={styles.referencePanel}>
                 <div className={styles.panelHeading}><div><p>PLAN FROM</p><h2>Choose your moment</h2></div><span className={styles.referenceIcon}><FaGlobe aria-hidden="true" /></span></div>
@@ -91,7 +102,7 @@ const WorldClockBoard = () => {
                 <div className={styles.overlapCount} role="status" aria-label={`${workCount} of ${clocks.length} cities in weekday work hours`}><strong>{workCount}</strong><span>of {clocks.length} cities in weekday work hours</span></div>
                 <h2>{overlapMessage}</h2>
                 <span className={styles.overlapTrack} aria-hidden="true"><i style={{ width: `${clocks.length ? workCount / clocks.length * 100 : 0}%` }} /></span>
-                <span className={styles.overlapTip}>{workCount >= 2 ? "Check the city cards for the best local fit." : workCount === 1 ? "Try moving the time to find more overlap." : "Move the reference time and compare again."}</span>
+                <span className={styles.overlapTip}>{overlapTip}</span>
             </section>
         </div>
 

@@ -3,6 +3,8 @@
     flex-direction: column;
     gap: 20px;
 
+    .storageWarning { margin: 0; padding: 11px 13px; border: 1px solid #7f6441; border-radius: 9px; color: #f0d6a7; background: #282317; font-size: 12px; line-height: 1.5; }
+
     .plannerControls {
         display: grid;
         grid-template-columns: minmax(0, 1.7fr) minmax(250px, .75fr);

@@ -26,14 +26,27 @@ export const localDateTimeForZone = (instant, timeZone) => {
     return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 };
 
+const wallTimeAsUtc = (value) => {
+    if (typeof value !== "string") return null;
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+    if (!match) return null;
+    const [, year, month, day, hour, minute] = match.map(Number);
+    const date = new Date(0);
+    date.setUTCFullYear(year, month - 1, day);
+    date.setUTCHours(hour, minute, 0, 0);
+    if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || date.getUTCHours() !== hour || date.getUTCMinutes() !== minute) return null;
+    return date.getTime();
+};
+
+export const isValidLocalDateTime = (value) => wallTimeAsUtc(value) !== null;
+
 export const instantFromZonedInput = (value, timeZone) => {
-    if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
-    const [date, time] = value.split("T");
-    const [year, month, day] = date.split("-").map(Number);
-    const [hour, minute] = time.split(":").map(Number);
-    const wallTimeAsUtc = Date.UTC(year, month - 1, day, hour, minute);
-    let instant = wallTimeAsUtc;
-    for (let attempt = 0; attempt < 3; attempt += 1) instant = wallTimeAsUtc - offsetAt(new Date(instant), timeZone);
+    const wallTime = wallTimeAsUtc(value);
+    if (wallTime === null) return null;
+    let instant = wallTime;
+    try {
+        for (let attempt = 0; attempt < 3; attempt += 1) instant = wallTime - offsetAt(new Date(instant), timeZone);
+    } catch { return null; }
     return new Date(instant);
 };
 

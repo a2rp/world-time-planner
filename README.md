@@ -19,7 +19,7 @@ Hourline helps compare a selected moment across cities. Choose a starting city a
 
 Conversions use the browser's built-in IANA timezone data through `Intl.DateTimeFormat`; the app makes no external time or geolocation API calls. It applies the timezone rules available in the current browser, including daylight-saving changes. A local time during a daylight-saving jump or repeated hour can be ambiguous, and the browser's timezone rules decide how that wall time is resolved.
 
-The saved cities, starting timezone, and reference date and time are stored in this browser's local storage on this device. They are not uploaded or synced to an account. Clearing this site's browser data restores the default city board. The picker includes a curated set of 16 cities; custom cities and user-defined timezone IDs are not supported yet.
+The saved cities, starting timezone, and reference date and time are stored in this browser's local storage on this device. They are not uploaded or synced to an account. Clearing this site's browser data restores the default city board. Saved settings are checked when loaded, and the app warns if the browser cannot save an update. The picker includes a curated set of 16 cities; custom cities and user-defined timezone IDs are not supported yet.
 
 The work-hour count is a simple weekday 9-to-5 check. It does not account for local holidays, individual schedules, or meeting duration.
 
